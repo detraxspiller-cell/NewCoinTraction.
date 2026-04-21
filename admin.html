@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard - NewCoinTraction</title>
+
+<style>
+body {
+font-family: Arial;
+background: #0b0f1a;
+color: white;
+margin: 0;
+}
+
+header {
+padding: 20px;
+background: #0f172a;
+display: flex;
+justify-content: space-between;
+}
+
+.container {
+padding: 20px;
+max-width: 1000px;
+margin: auto;
+}
+
+.card {
+background: #111827;
+padding: 15px;
+margin-bottom: 15px;
+border-radius: 10px;
+border: 1px solid #1f2937;
+}
+
+button {
+padding: 8px 12px;
+margin-right: 5px;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+}
+
+.approve { background: #22c55e; color: white; }
+.reject { background: #ef4444; color: white; }
+</style>
+
+</head>
+
+<body>
+
+<header>
+<h2>Admin Dashboard</h2>
+</header>
+
+<div class="container" id="app"></div>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm"
+
+const supabaseUrl = "https://hgfkuyuwcuelwvgfnbjz.supabase.co"
+const supabaseKey = "sb_publishable_iunD7yw0kNeRThfH78WAdA_eg67ISWN"
+
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+async function loadApplications() {
+const { data } = await supabase
+.from("applications")
+.select("*")
+.eq("status", "pending")
+
+document.getElementById("app").innerHTML = data.map(p => `
+<div class="card">
+<h3>${p.project_name}</h3>
+<p>${p.description}</p>
+
+<p><b>Website:</b> ${p.website}</p>
+
+<button class="approve" onclick="approve('${p.id}')">Approve</button>
+<button class="reject" onclick="reject('${p.id}')">Reject</button>
+</div>
+`).join("")
+}
+
+window.approve = async (id) => {
+await supabase
+.from("applications")
+.update({ status: "approved" })
+.eq("id", id)
+
+loadApplications()
+}
+
+window.reject = async (id) => {
+await supabase
+.from("applications")
+.update({ status: "rejected" })
+.eq("id", id)
+
+loadApplications()
+}
+
+loadApplications()
+</script>
+
+</body>
+</html>
